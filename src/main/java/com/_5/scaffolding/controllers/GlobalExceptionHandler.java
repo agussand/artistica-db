@@ -1,0 +1,45 @@
+package com._5.scaffolding.controllers;
+
+import com._5.scaffolding.exception.ErrorApi;
+import com._5.scaffolding.exception.InvalidOperationException;
+import com._5.scaffolding.exception.RecursoNoEncontradoException;
+import org.apache.coyote.Response;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.ControllerAdvice;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+
+import java.sql.Timestamp;
+import java.time.ZonedDateTime;
+
+@ControllerAdvice
+public class GlobalExceptionHandler {
+
+    @ExceptionHandler(Exception.class)
+    public ResponseEntity<ErrorApi> handleError(Exception exception){
+        ErrorApi error = buildError(exception.getMessage(), HttpStatus.INTERNAL_SERVER_ERROR);
+        return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(error);
+    }
+
+    @ExceptionHandler(RecursoNoEncontradoException.class)
+    public ResponseEntity<ErrorApi> handleRecursoNoEncontrado(RecursoNoEncontradoException ex){
+        ErrorApi err = buildError(ex.getMessage(), HttpStatus.NOT_FOUND);
+        return ResponseEntity.status(HttpStatus.NOT_FOUND).body(err);
+    }
+
+    @ExceptionHandler(InvalidOperationException.class)
+    public ResponseEntity<ErrorApi> handleInvalidOperation(InvalidOperationException ex){
+        ErrorApi err = buildError(ex.getMessage(), HttpStatus.BAD_REQUEST);
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
+    }
+
+
+    private ErrorApi buildError(String message, HttpStatus status) {
+        return ErrorApi.builder()
+                .timestamp(String.valueOf(Timestamp.from(ZonedDateTime.now().toInstant())))
+                .error(status.getReasonPhrase())
+                .status(status.value())
+                .message(message)
+                .build();
+    }
+}
