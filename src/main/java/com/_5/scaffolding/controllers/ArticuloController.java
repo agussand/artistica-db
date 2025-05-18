@@ -12,6 +12,7 @@ import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import java.net.URI;
@@ -41,14 +42,15 @@ public class ArticuloController {
     }
 
     @PostMapping("/new")
-    public ResponseEntity<ArticuloDto> nuevoArticulo(@RequestBody @Valid ArticuloPOSTDTO nuevoArticulo){
+    public ResponseEntity<ArticuloDto> nuevoArticulo(@Valid @RequestBody ArticuloPOSTDTO nuevoArticulo){
         Articulo articuloCreado = articuloService.crear(modelMapper.map(nuevoArticulo, Articulo.class));
         return ResponseEntity.status(201).body(modelMapper.map(articuloCreado, ArticuloDto.class));
     }
 
     @PutMapping("/{id}")
+    @Valid
     public ResponseEntity<Articulo> editarArticulo(@PathVariable Long id,
-                                               @RequestBody ArticuloPOSTDTO articulo){
+                                                   @Valid @RequestBody ArticuloPOSTDTO articulo){
         Articulo articuloEditado = articuloService.editar(id, modelMapper.map(articulo, Articulo.class));
         return ResponseEntity.status(200).body(articuloEditado);
     }
