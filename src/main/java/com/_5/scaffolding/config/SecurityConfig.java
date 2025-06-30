@@ -4,6 +4,7 @@ import com._5.scaffolding.security.JwtAuthenticationFilter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
@@ -12,6 +13,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 
 @Configuration
 @EnableWebSecurity
+@EnableMethodSecurity
 public class SecurityConfig {
     private final JwtAuthenticationFilter jwtAuthFilter;
     private final AuthenticationProvider authenticationProvider;
@@ -30,8 +32,6 @@ public class SecurityConfig {
                         .requestMatchers("/api/auth/**", "/v3/api-docs/**", "/swagger-ui/**").permitAll()
 
                         // Rutas protegidas por rol
-                        // Aquí usamos los roles que definiste: ADMINISTRADOR y USUARIO
-                        .requestMatchers("/api/articulos/admin/**").hasAuthority("ADMIN")
                         .requestMatchers("/api/articulos/**").hasAnyAuthority("ADMIN", "USUARIO")
 
                         // Cualquier otra petición debe ser autenticada

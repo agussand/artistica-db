@@ -15,6 +15,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
@@ -35,22 +36,25 @@ public class ArticuloController {
     private ModelMapper modelMapper;
 
     @GetMapping()
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USUARIO')")
     public ResponseEntity<Page<Articulo>> getAll(
             @RequestParam(defaultValue = "0") int page,
-            @RequestParam(defaultValue = "10") int size,
-            @RequestParam(defaultValue = "desc")String sortBy){
-        Sort sort = sortBy.equalsIgnoreCase("desc") ?
-                Sort.by(Sort.Direction.DESC) : Sort.by(Sort.Direction.ASC);
-        Page<Articulo> articulos = articuloService.getAll(PageRequest.of(page, size, sort));
+            @RequestParam(defaultValue = "10") int size ){
+        Page<Articulo> articulos = articuloService.getAll(PageRequest.of(page, size));
         return ResponseEntity.ok(articulos);
     }
 
+
+
     @GetMapping("/{id}")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USUARIO')")
     public ResponseEntity<Articulo> getById(@PathVariable("id") Long id){
         return ResponseEntity.ok(modelMapper.map(articuloService.getById(id), Articulo.class));
     }
 
     @PostMapping
+    @Valid
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<ArticuloDto> nuevoArticulo(@Valid @RequestBody ArticuloPOSTDTO nuevoArticulo){
         Articulo articuloCreado = articuloService.crear(modelMapper.map(nuevoArticulo, Articulo.class));
         return ResponseEntity.status(201).body(modelMapper.map(articuloCreado, ArticuloDto.class));
@@ -58,6 +62,7 @@ public class ArticuloController {
 
     @PutMapping("/{id}")
     @Valid
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Articulo> editarArticulo(@PathVariable Long id,
                                                    @Valid @RequestBody ArticuloPOSTDTO articulo){
         Articulo articuloEditado = articuloService.editar(id, modelMapper.map(articulo, Articulo.class));
@@ -65,6 +70,7 @@ public class ArticuloController {
     }
 
     @DeleteMapping("/{id}")
+    @PreAuthorize("hasAuthority('ADMIN')")
     public ResponseEntity<Articulo> eliminarArticulo(@PathVariable Long id){
         Articulo articuloEliminado = articuloService.eliminar(id);
         return ResponseEntity.status(200).body(articuloEliminado);
