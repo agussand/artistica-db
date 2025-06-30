@@ -1,3 +1,10 @@
+INSERT INTO usuarios (username, password, rol) VALUES
+('admin.user', '$2a$10$rBioT0lM9WdRu8aeSoLIueJtCCogWCXINhZ.eLM4s4Goseij0RZqe', 'ADMIN'),
+('caja.user', '$2a$10$rBioT0lM9WdRu8aeSoLIueJtCCogWCXINhZ.eLM4s4Goseij0RZqe', 'USUARIO');
+
+
+
+
 -- INSERTS GENERADOS PARA LA TABLA articulos
 
 INSERT INTO articulos (

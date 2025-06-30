@@ -11,6 +11,9 @@ import org.apache.coyote.Response;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -31,9 +34,16 @@ public class ArticuloController {
     @Autowired
     private ModelMapper modelMapper;
 
-    @GetMapping("/all")
-    public ResponseEntity<List<Articulo>> getAll(){
-        return ResponseEntity.ok(modelMapper.map(articuloService.getAll(), new TypeToken<List<Articulo>>() {}.getType()));
+    @GetMapping()
+    public ResponseEntity<Page<Articulo>> getAll(
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size,
+            @RequestParam(defaultValue = "desc")String sortBy){
+        Sort sort = sortBy.equalsIgnoreCase("desc") ?
+                Sort.by(Sort.Direction.DESC) : Sort.by(Sort.Direction.ASC);
+        Page<Articulo> articulos = articuloService.getAll(PageRequest.of(page, size, sort));
+
+        return ResponseEntity.ok(articulos);
     }
 
     @GetMapping("/{id}")
@@ -41,7 +51,7 @@ public class ArticuloController {
         return ResponseEntity.ok(modelMapper.map(articuloService.getById(id), Articulo.class));
     }
 
-    @PostMapping("/new")
+    @PostMapping
     public ResponseEntity<ArticuloDto> nuevoArticulo(@Valid @RequestBody ArticuloPOSTDTO nuevoArticulo){
         Articulo articuloCreado = articuloService.crear(modelMapper.map(nuevoArticulo, Articulo.class));
         return ResponseEntity.status(201).body(modelMapper.map(articuloCreado, ArticuloDto.class));

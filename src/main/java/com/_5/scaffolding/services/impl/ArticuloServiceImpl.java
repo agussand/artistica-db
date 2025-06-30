@@ -10,7 +10,10 @@ import com._5.scaffolding.services.ArticuloService;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -28,9 +31,10 @@ public class ArticuloServiceImpl implements ArticuloService {
     private ModelMapper mergerMapper;
 
     @Override
-    public List<Articulo> getAll() {
-        List<ArticuloEntity> articuloEntities = articuloRepository.findAllByStatus(Status.ACTIVO);
-        return modelMapper.map(articuloEntities, new TypeToken<List<Articulo>>() {}.getType());
+    @Transactional(readOnly = true) // Es buena práctica usar transacciones de solo lectura para consultas
+    public Page<Articulo> getAll(Pageable pageable) {
+        Page<ArticuloEntity> articulosPage = articuloRepository.findAllByStatus(Status.ACTIVO, pageable);
+        return modelMapper.map(articulosPage, new TypeToken<Page<Articulo>>() {}.getType());
     }
 
     @Override

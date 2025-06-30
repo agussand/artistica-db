@@ -6,7 +6,9 @@ import com._5.scaffolding.exception.RecursoNoEncontradoException;
 import jakarta.validation.ValidationException;
 import org.apache.coyote.Response;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.HttpStatusCode;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -47,6 +49,13 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorApi> handleInvalidOperation(InvalidOperationException ex){
         ErrorApi err = buildError(ex.getMessage(), HttpStatus.BAD_REQUEST);
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(err);
+    }
+
+    @ExceptionHandler(BadCredentialsException.class)
+    public ResponseEntity<ErrorApi> handleBadCredentials(BadCredentialsException ex) {
+        // No expongas el mensaje de la excepción interna por seguridad.
+        ErrorApi error = buildError("Credenciales inválidas. Por favor, verifique el usuario y la contraseña.", HttpStatus.FORBIDDEN);
+        return ResponseEntity.status(error.getStatus()).body(error);
     }
 
 
