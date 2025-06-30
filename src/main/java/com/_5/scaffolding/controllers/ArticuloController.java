@@ -42,7 +42,6 @@ public class ArticuloController {
         Sort sort = sortBy.equalsIgnoreCase("desc") ?
                 Sort.by(Sort.Direction.DESC) : Sort.by(Sort.Direction.ASC);
         Page<Articulo> articulos = articuloService.getAll(PageRequest.of(page, size, sort));
-
         return ResponseEntity.ok(articulos);
     }
 
