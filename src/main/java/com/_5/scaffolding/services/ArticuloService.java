@@ -10,6 +10,7 @@ import java.util.List;
 
 @Service
 public interface ArticuloService {
+    Page<Articulo> searchArticulos(String searchTerm, Pageable pageable);
     Page<Articulo> getAll(Pageable pageable);
     Articulo getById(Long id);
     Articulo crear(Articulo articulo);

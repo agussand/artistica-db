@@ -1,29 +1,26 @@
 package com._5.scaffolding.controllers;
 
-import com._5.scaffolding.dtos.ArticuloDto;
+import com._5.scaffolding.dtos.ArticuloDTO;
 import com._5.scaffolding.dtos.ArticuloPOSTDTO;
-import com._5.scaffolding.entities.ArticuloEntity;
 import com._5.scaffolding.models.Articulo;
 import com._5.scaffolding.repositories.ArticuloRepository;
 import com._5.scaffolding.services.ArticuloService;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
-import org.apache.coyote.Response;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
-import java.net.URI;
-import java.util.List;
-
 @RestController
-@RequestMapping("/articulos")
+@RequestMapping("/api/articulos")
+@CrossOrigin(origins = "http://localhost:4200")
 public class ArticuloController {
 
     @Autowired
@@ -35,7 +32,23 @@ public class ArticuloController {
     @Autowired
     private ModelMapper modelMapper;
 
+
     @GetMapping()
+    @Operation(summary = "Obtiene una lista paginada y filtrada de artículos")
+    @PreAuthorize("hasAnyAuthority('ADMIN', 'USUARIO')")
+    public ResponseEntity<Page<ArticuloDTO>> getAllArticulos(
+            @Parameter(description = "Término de búsqueda para filtrar por ID, descripción o código de barras.")
+            @RequestParam(required = false) String searchTerm,
+
+            @RequestParam(defaultValue = "0") int page,
+            @RequestParam(defaultValue = "10") int size
+    ) {
+        Page<ArticuloDTO> articulos = modelMapper.map(articuloService.searchArticulos(searchTerm, PageRequest.of(page, size)), new TypeToken<Page<ArticuloDTO>>() {}.getType());
+        return ResponseEntity.ok(articulos);
+    }
+
+
+    @GetMapping("/all")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USUARIO')")
     public ResponseEntity<Page<Articulo>> getAll(
             @RequestParam(defaultValue = "0") int page,
@@ -43,8 +56,6 @@ public class ArticuloController {
         Page<Articulo> articulos = articuloService.getAll(PageRequest.of(page, size));
         return ResponseEntity.ok(articulos);
     }
-
-
 
     @GetMapping("/{id}")
     @PreAuthorize("hasAnyAuthority('ADMIN', 'USUARIO')")
@@ -55,9 +66,9 @@ public class ArticuloController {
     @PostMapping
     @Valid
     @PreAuthorize("hasAuthority('ADMIN')")
-    public ResponseEntity<ArticuloDto> nuevoArticulo(@Valid @RequestBody ArticuloPOSTDTO nuevoArticulo){
+    public ResponseEntity<Articulo> nuevoArticulo(@Valid @RequestBody ArticuloPOSTDTO nuevoArticulo){
         Articulo articuloCreado = articuloService.crear(modelMapper.map(nuevoArticulo, Articulo.class));
-        return ResponseEntity.status(201).body(modelMapper.map(articuloCreado, ArticuloDto.class));
+        return ResponseEntity.status(201).body(articuloCreado);
     }
 
     @PutMapping("/{id}")

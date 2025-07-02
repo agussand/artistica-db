@@ -7,16 +7,17 @@ import com._5.scaffolding.models.Articulo;
 import com._5.scaffolding.models.Status;
 import com._5.scaffolding.repositories.ArticuloRepository;
 import com._5.scaffolding.services.ArticuloService;
+import com._5.scaffolding.specifications.ArticuloSpecification;
 import org.modelmapper.ModelMapper;
 import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDateTime;
-import java.util.List;
 
 @Service
 public class ArticuloServiceImpl implements ArticuloService {
@@ -29,6 +30,17 @@ public class ArticuloServiceImpl implements ArticuloService {
 
     @Autowired
     private ModelMapper mergerMapper;
+
+    @Transactional(readOnly = true)
+    public Page<Articulo> searchArticulos(String searchTerm, Pageable pageable) {
+        // 1. Construimos la especificación usando nuestra clase helper.
+        Specification<ArticuloEntity> spec = ArticuloSpecification.build(searchTerm);
+
+        // 2. Pasamos la especificación y la paginación al repositorio.
+        Page<ArticuloEntity> articulosPage = articuloRepository.findAll(spec, pageable);
+
+        return modelMapper.map(articulosPage, new TypeToken<Page<Articulo>>() {}.getType());
+    }
 
     @Override
     @Transactional(readOnly = true) // Es buena práctica usar transacciones de solo lectura para consultas
