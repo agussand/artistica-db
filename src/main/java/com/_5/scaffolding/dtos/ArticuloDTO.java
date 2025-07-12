@@ -12,7 +12,5 @@ public class ArticuloDTO {
     private Long id;
     private String descripcion;
     private String subCategoria;
-    private String codigoBarra;
-    private Double precioLista;
     private Double precioVenta;
 }

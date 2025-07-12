@@ -1,5 +1,6 @@
 package com._5.scaffolding.controllers;
 
+import com._5.scaffolding.dtos.ArticuloAdminDTO;
 import com._5.scaffolding.dtos.ArticuloDTO;
 import com._5.scaffolding.dtos.ArticuloPOSTDTO;
 import com._5.scaffolding.models.Articulo;
@@ -27,10 +28,21 @@ public class ArticuloController {
     private ArticuloService articuloService;
 
     @Autowired
-    private ArticuloRepository articuloRepository;
-
-    @Autowired
     private ModelMapper modelMapper;
+
+    @GetMapping("/admin")
+    @PreAuthorize("hasAuthority('ADMIN')")
+    @Operation(summary = "Obtiene una lista paginada y filtrada de artículos con datos de admin")
+    public ResponseEntity<Page<ArticuloAdminDTO>> getAllArticulosForAdmin(
+            @Parameter(description = "Término de búsqueda para filtrar por ID, descripción o código de barras.")
+            @RequestParam(required = false) String searchTerm,
+
+            @Parameter(description = "Paginación y ordenamiento")
+            Pageable pageable
+    ) {
+        Page<ArticuloAdminDTO> articulos = articuloService.getAllArticulosForAdmin(searchTerm, pageable);
+        return ResponseEntity.ok(articulos);
+    }
 
 
     @GetMapping()
@@ -43,7 +55,7 @@ public class ArticuloController {
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "10") int size
     ) {
-        Page<ArticuloDTO> articulos = modelMapper.map(articuloService.searchArticulos(searchTerm, PageRequest.of(page, size)), new TypeToken<Page<ArticuloDTO>>() {}.getType());
+        Page<ArticuloDTO> articulos = articuloService.searchArticulos(searchTerm, PageRequest.of(page, size));
         return ResponseEntity.ok(articulos);
     }
 

@@ -8,6 +8,7 @@ import lombok.Data;
 
 @Data
 public class ArticuloPOSTDTO {
+    private Long id;
     @NotBlank(message = "El campo 'descripcion' no puede estar vacío.")
     @Size(min = 3, max = 300, message = "El campo 'descripcion' debe tener 3 caracteres o más")
     private String descripcion;

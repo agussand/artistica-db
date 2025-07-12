@@ -1,6 +1,7 @@
 package com._5.scaffolding.specifications;
 
 import com._5.scaffolding.entities.ArticuloEntity;
+import com._5.scaffolding.models.Status;
 import jakarta.persistence.criteria.Predicate;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Component;
@@ -17,32 +18,34 @@ public class ArticuloSpecification {
 
     public static Specification<ArticuloEntity> build(String searchTerm){
         return (root, query, criteriaBuilder) -> {
-            // Si el término de búsqueda es nulo o vacío, no aplicamos ningún filtro.
+
+            // Esta condición se aplicará SIEMPRE a todas las búsquedas.
+            Predicate statusPredicate = criteriaBuilder.equal(root.get("status"), Status.ACTIVO);
+
+            // Si no hay término de búsqueda, devolvemos solo el filtro de estado.
             if (searchTerm == null || searchTerm.trim().isEmpty()) {
-                return criteriaBuilder.conjunction(); // Devuelve un predicado que siempre es verdadero.
+                return statusPredicate;
             }
 
-            // Preparamos una lista para los posibles predicados (condiciones OR)
-            List<Predicate> orPredicates = new ArrayList<>();
+            String trimmedSearchTerm = searchTerm.trim();
 
-            // 1. Búsqueda por descripción (siempre se aplica)
-            orPredicates.add(criteriaBuilder.like(criteriaBuilder.lower(root.get("descripcion")), "%" + searchTerm.toLowerCase() + "%"));
+            // VERIFICAMOS SI EL TÉRMINO DE BÚSQUEDA ES PURAMENTE NUMÉRICO
+            if (trimmedSearchTerm.matches("\\d+")) {
+                // Si es un número, buscamos por ID o por código de barras.
+                try {
+                    Long id = Long.parseLong(trimmedSearchTerm);
+                    Predicate idPredicate = criteriaBuilder.equal(root.get("id"), id);
+                    Predicate codigoBarraPredicate = criteriaBuilder.equal(root.get("codigoBarra"), trimmedSearchTerm);
 
-            // 2. Búsqueda por código de barra (siempre se aplica)
-            // Cuando implementes la lectura, esto funcionará automáticamente.
-            orPredicates.add(criteriaBuilder.equal(root.get("codigoBarra"), searchTerm));
-
-            // 3. Búsqueda por ID (solo si el término es un número válido)
-            try {
-                Long id = Long.parseLong(searchTerm);
-                orPredicates.add(criteriaBuilder.equal(root.get("id"), id));
-            } catch (NumberFormatException e) {
-                // Si no es un número, simplemente ignoramos la búsqueda por ID.
+                    return criteriaBuilder.or(idPredicate, codigoBarraPredicate);
+                } catch (NumberFormatException e) {
+                    // Si es un número demasiado grande para ser un Long, solo buscamos por código de barras.
+                    return criteriaBuilder.equal(root.get("codigoBarra"), trimmedSearchTerm);
+                }
+            } else {
+                // Si contiene texto, buscamos ÚNICAMENTE en la descripción.
+                return criteriaBuilder.like(criteriaBuilder.lower(root.get("descripcion")), "%" + trimmedSearchTerm.toLowerCase() + "%");
             }
-
-            // Combinamos todos los predicados con un 'OR'.
-            // El resultado será: (descripcion LIKE ?) OR (codigoBarra = ?) OR (id = ?)
-            return criteriaBuilder.or(orPredicates.toArray(new Predicate[0]));
         };
     }
 }

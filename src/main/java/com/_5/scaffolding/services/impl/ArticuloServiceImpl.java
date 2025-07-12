@@ -1,5 +1,7 @@
 package com._5.scaffolding.services.impl;
 
+import com._5.scaffolding.dtos.ArticuloAdminDTO;
+import com._5.scaffolding.dtos.ArticuloDTO;
 import com._5.scaffolding.entities.ArticuloEntity;
 import com._5.scaffolding.exception.InvalidOperationException;
 import com._5.scaffolding.exception.RecursoNoEncontradoException;
@@ -31,15 +33,25 @@ public class ArticuloServiceImpl implements ArticuloService {
     @Autowired
     private ModelMapper mergerMapper;
 
+    @Override
     @Transactional(readOnly = true)
-    public Page<Articulo> searchArticulos(String searchTerm, Pageable pageable) {
+    public Page<ArticuloAdminDTO> getAllArticulosForAdmin(String searchTerm, Pageable pageable) {
+        Specification<ArticuloEntity> spec = ArticuloSpecification.build(searchTerm);
+        Page<ArticuloEntity> articulosPage = articuloRepository.findAll(spec, pageable);
+
+        // Usamos ModelMapper para convertir cada entidad en la página a ArticuloAdminDTO.
+        return articulosPage.map(articuloEntity -> modelMapper.map(articuloEntity, ArticuloAdminDTO.class));
+    }
+
+    @Transactional(readOnly = true)
+    public Page<ArticuloDTO> searchArticulos(String searchTerm, Pageable pageable) {
         // 1. Construimos la especificación usando nuestra clase helper.
         Specification<ArticuloEntity> spec = ArticuloSpecification.build(searchTerm);
 
         // 2. Pasamos la especificación y la paginación al repositorio.
         Page<ArticuloEntity> articulosPage = articuloRepository.findAll(spec, pageable);
 
-        return modelMapper.map(articulosPage, new TypeToken<Page<Articulo>>() {}.getType());
+        return modelMapper.map(articulosPage, new TypeToken<Page<ArticuloDTO>>() {}.getType());
     }
 
     @Override

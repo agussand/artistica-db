@@ -7,6 +7,9 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import org.hibernate.annotations.Where;
+
+import java.math.BigDecimal;
 import java.time.LocalDateTime;
 
 
@@ -14,6 +17,7 @@ import java.time.LocalDateTime;
 @AllArgsConstructor
 @NoArgsConstructor
 @Table(name = "articulos")
+@Where(clause = "status = 'ACTIVO'")
 @Getter
 @Setter
 public class ArticuloEntity {
@@ -35,11 +39,11 @@ public class ArticuloEntity {
     private Status status;
 
     // Precios
-    @Column(name = "precio_lista")
-    private Double precioLista;
+    @Column(name = "precio_lista", precision = 10, scale = 2)
+    private BigDecimal precioLista;
 
-    @Column(name = "precio_venta")
-    private Double precioVenta;
+    @Column(name = "precio_venta", precision = 10, scale = 2)
+    private BigDecimal precioVenta;
 
     // Tasa de IVA - se puede dejar acá como valor numérico o separar en una tabla
     @Column(name = "tas_iva")
