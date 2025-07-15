@@ -35,7 +35,7 @@ public class ArticuloServiceImpl implements ArticuloService {
 
     @Override
     @Transactional(readOnly = true)
-    public Page<ArticuloAdminDTO> getAllArticulosForAdmin(String searchTerm, Pageable pageable) {
+    public Page<ArticuloAdminDTO> searchArticulosForAdmin(String searchTerm, Pageable pageable) {
         Specification<ArticuloEntity> spec = ArticuloSpecification.build(searchTerm);
         Page<ArticuloEntity> articulosPage = articuloRepository.findAll(spec, pageable);
 
@@ -43,6 +43,7 @@ public class ArticuloServiceImpl implements ArticuloService {
         return articulosPage.map(articuloEntity -> modelMapper.map(articuloEntity, ArticuloAdminDTO.class));
     }
 
+    @Override
     @Transactional(readOnly = true)
     public Page<ArticuloDTO> searchArticulos(String searchTerm, Pageable pageable) {
         // 1. Construimos la especificación usando nuestra clase helper.
@@ -51,14 +52,14 @@ public class ArticuloServiceImpl implements ArticuloService {
         // 2. Pasamos la especificación y la paginación al repositorio.
         Page<ArticuloEntity> articulosPage = articuloRepository.findAll(spec, pageable);
 
-        return modelMapper.map(articulosPage, new TypeToken<Page<ArticuloDTO>>() {}.getType());
+        return articulosPage.map(articuloEntity -> modelMapper.map(articuloEntity, ArticuloDTO.class));
     }
 
     @Override
     @Transactional(readOnly = true) // Es buena práctica usar transacciones de solo lectura para consultas
     public Page<Articulo> getAll(Pageable pageable) {
         Page<ArticuloEntity> articulosPage = articuloRepository.findAllByStatus(Status.ACTIVO, pageable);
-        return modelMapper.map(articulosPage, new TypeToken<Page<Articulo>>() {}.getType());
+        return articulosPage.map(articuloEntity -> modelMapper.map(articuloEntity, Articulo.class));
     }
 
     @Override

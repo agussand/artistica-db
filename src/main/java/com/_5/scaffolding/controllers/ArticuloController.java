@@ -4,13 +4,11 @@ import com._5.scaffolding.dtos.ArticuloAdminDTO;
 import com._5.scaffolding.dtos.ArticuloDTO;
 import com._5.scaffolding.dtos.ArticuloPOSTDTO;
 import com._5.scaffolding.models.Articulo;
-import com._5.scaffolding.repositories.ArticuloRepository;
 import com._5.scaffolding.services.ArticuloService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 import org.modelmapper.ModelMapper;
-import org.modelmapper.TypeToken;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -40,7 +38,7 @@ public class ArticuloController {
             @Parameter(description = "Paginación y ordenamiento")
             Pageable pageable
     ) {
-        Page<ArticuloAdminDTO> articulos = articuloService.getAllArticulosForAdmin(searchTerm, pageable);
+        Page<ArticuloAdminDTO> articulos = articuloService.searchArticulosForAdmin(searchTerm, pageable);
         return ResponseEntity.ok(articulos);
     }
 
