@@ -53,7 +53,6 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(BadCredentialsException.class)
     public ResponseEntity<ErrorApi> handleBadCredentials(BadCredentialsException ex) {
-        // No expongas el mensaje de la excepción interna por seguridad.
         ErrorApi error = buildError("Credenciales inválidas. Por favor, verifique el usuario y la contraseña.", HttpStatus.FORBIDDEN);
         return ResponseEntity.status(error.getStatus()).body(error);
     }
